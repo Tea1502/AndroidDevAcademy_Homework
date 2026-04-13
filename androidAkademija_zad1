@@ -1,0 +1,135 @@
+fun zadatak1() {
+    val name: String = "Iva"
+    val lastName: String = "Ivic"
+    var email: String? = null
+    var age: Int? = 25
+    
+    println(email?.length)
+    
+    email = "iva.ivic@gmail.com"
+    println(email?.length)
+}
+
+fun zadatak2() {
+    var productCode = 2 
+    var price = 3
+    var recievedMoney = 5 
+    
+   val productName = when(productCode){
+        1 -> {
+        	price = 2 
+            "voda"
+        }
+        2 -> {
+        	price = 3 
+            "Cola"
+        }
+        3 -> {
+        	price = 3
+            "sok"
+        }
+        4 -> { 
+        	price = 2 
+            "kava"
+        }
+    }
+    
+    if(recievedMoney >= price){ 
+    	println("Tocim $productName, a ostatak je ${receivedMoney - price}")
+    }else{
+        println("Nedostaje ${price - receivedMoney} za odabrano pice")
+    }
+}
+
+fun zadatak3() {
+    val steps = listOf(4500,12000,8000,15000,3000,11000,9500)
+    
+    var sum = 0
+    for(step in steps){
+        sum += step
+    }
+    
+    println("Ovaj tjedan ste presli $sum koraka.")
+    
+    var i = 0
+    while(i < steps.size){
+		if(steps[i] > 10000){
+            println("${i+1}. dan ste presli vise od 10000 koraka")
+            break
+        }
+        i++
+    }
+}
+
+
+fun zadatak4() {
+    
+    val username = readln()
+    val processed = username.trim().lowercase()
+
+    val valid = processed.length in 5..15 &&
+            processed.first().isLetter() &&
+            processed.all { it.isLetterOrDigit() || it == '_' } &&
+            !processed.contains(" ") &&
+            !processed.isBlank()
+
+    println("Obrađeno korisničko ime: $processed")
+    println("Je li valjano: $valid")
+}
+
+//ZADATAK5
+object TransactionLogger {
+    fun log(message: String) {
+        println(message)
+    }
+}
+
+class BankAccount(val accountNumber: String) {
+
+    var balance = 0.0
+
+    init {
+        totalAccounts++
+        TransactionLogger.log("Kreiran racun: $accountNumber")
+    }
+
+    fun deposit(amount: Double) {
+        if (amount > 0) {
+            balance += amount
+            TransactionLogger.log("Uplata $amount na $accountNumber. Stanje: $balance")
+        } else {
+            println("Neispravna uplata")
+        }
+    }
+
+    fun withdraw(amount: Double) {
+        if (amount > balance) {
+            println("Nedovoljno sredstava")
+        } else if (amount > 0) {
+            balance -= amount
+            TransactionLogger.log("Isplata $amount s $accountNumber. Stanje: $balance")
+        } else {
+            println("Neispravan iznos")
+        }
+    }
+
+    companion object {
+        var totalAccounts = 0
+    }
+}
+
+fun zadatak5() {
+
+    val account1 = BankAccount("12345")
+    val account2 = BankAccount("54321")
+
+    account1.deposit(900.0)
+    account2.deposit(800.0)
+    account1.withdraw(150.0)
+    account2.withdraw(300.0)
+
+    println("Stanje ${account1.accountNumber}: ${account1.balance}")
+    println("Stanje ${account2.accountNumber}: ${account2.balance}")
+
+    println("Ukupno racuna: ${BankAccount.totalAccounts}")
+}
