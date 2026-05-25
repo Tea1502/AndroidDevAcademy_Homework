@@ -2,20 +2,38 @@ package com.example.notesapp.navigation
 
 import androidx.compose.runtime.Composable
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.lifecycle.viewmodel.initializer
+import androidx.lifecycle.viewmodel.viewModelFactory
 import androidx.navigation.compose.*
+import com.example.notesapp.model.NoteRepository
 import com.example.notesapp.screens.NoteEditScreen
 import com.example.notesapp.screens.NoteListScreen
-import com.example.notesapp.viewmodel.NoteViewModel
+import com.example.notesapp.viewmodel.ListViewModel
+import com.example.notesapp.viewmodel.EditViewModel
+
+private val repository by lazy { NoteRepository() }
+
+val ListViewModelFactory = viewModelFactory {
+    initializer {
+        ListViewModel(repository)
+    }
+}
+
+val EditViewModelFactory = viewModelFactory {
+    initializer {
+        EditViewModel(repository)
+    }
+}
 
 @Composable
 fun NavGraph() {
     val navController = rememberNavController()
-    val viewModel: NoteViewModel = viewModel()
 
     NavHost(navController = navController, startDestination = "list") {
 
         composable("list") {
-            NoteListScreen(navController, viewModel)
+            val listViewModel: ListViewModel = viewModel(factory = ListViewModelFactory)
+            NoteListScreen(navController, listViewModel)
         }
 
         composable("edit/{noteId}") { backStackEntry ->
@@ -23,7 +41,8 @@ fun NavGraph() {
                 ?.getString("noteId")
                 ?.toIntOrNull() ?: -1
 
-            NoteEditScreen(navController, viewModel, noteId)
+            val editViewModel: EditViewModel = viewModel(factory = EditViewModelFactory)
+            NoteEditScreen(navController, editViewModel, noteId)
         }
     }
 }
