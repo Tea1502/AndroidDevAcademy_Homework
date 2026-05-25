@@ -1,22 +1,31 @@
 package com.example.notesapp.model
 
-class NoteRepository {
-    private val _notes = mutableStateListOf<Note>()
-    val notes: List<Note> = _notes
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 
+class NoteRepository {
     private var nextId = 1
 
-    fun addNote(title: String, description: String) {
+    private val _notesFlow = MutableStateFlow<List<Note>>(emptyList())
+    val notesFlow: StateFlow<List<Note>> = _notesFlow.asStateFlow()
 
-        _notes.add(Note(nextId++, title, description, "26.04.2026."))
+    fun addNote(title: String, description: String) {
+        val currentList = _notesFlow.value.toMutableList()
+        currentList.add(Note(nextId++, title, description, "25.05.2026."))
+        _notesFlow.value = currentList
     }
 
     fun updateNote(id: Int, title: String, description: String) {
-        val index = _notes.indexOfFirst { it.id == id }
+        val currentList = _notesFlow.value.toMutableList()
+        val index = currentList.indexOfFirst { it.id == id }
         if (index != -1) {
-            _notes[index] = _notes[index].copy(title = title, description = description)
+            currentList[index] = currentList[index].copy(title = title, description = description)
+            _notesFlow.value = currentList
         }
     }
 
-    fun getNoteById(id: Int) = _notes.find { it.id == id }
+    fun getNoteById(id: Int): Note? {
+        return _notesFlow.value.find { it.id == id }
+    }
 }
