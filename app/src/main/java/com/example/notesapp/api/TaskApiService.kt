@@ -10,16 +10,16 @@ interface TaskApiService {
     suspend fun login(@Body request: LoginRequest): LoginResponse
 
     @GET("tasks/all")
-    suspend fun getAllTasks(@Header("Authorization") token: String): TasksResponse // Vraća omot s tasks listom!
+    suspend fun getAllTasks(@Header("Authorization") token: String): TasksResponse
 
     @POST("tasks/create")
-    suspend fun createTask(@Header("Authorization") token: String, @Body request: TaskRequest): Task
+    suspend fun createTask(@Header("Authorization") token: String, @Body request: TaskRequest): Unit
 
     @GET("tasks/{id}")
     suspend fun getTaskById(@Header("Authorization") token: String, @Path("id") id: String): Task
 
     @PUT("tasks/{id}")
-    suspend fun updateTask(@Header("Authorization") token: String, @Path("id") id: String, @Body request: TaskRequest): Task
+    suspend fun updateTask(@Header("Authorization") token: String, @Path("id") id: String, @Body request: TaskRequest): Unit
 
     @DELETE("tasks/{id}")
     suspend fun deleteTask(@Header("Authorization") token: String, @Path("id") id: String)

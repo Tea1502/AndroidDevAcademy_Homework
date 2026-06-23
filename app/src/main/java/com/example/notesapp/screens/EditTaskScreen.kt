@@ -1,24 +1,30 @@
 package com.example.notesapp.screens
 
+import android.widget.Toast
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import com.example.notesapp.viewmodel.TaskViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun EditTaskScreen(navController: androidx.navigation.NavController, viewModel: TaskViewModel, taskId: String) {
+fun EditTaskScreen(
+    navController: androidx.navigation.NavController,
+    viewModel: com.example.notesapp.viewmodel.TaskViewModel,
+    taskId: String
+) {
     val uiState by viewModel.uiState.collectAsState()
     var title by remember { mutableStateOf("") }
     var description by remember { mutableStateOf("") }
 
+    val context = LocalContext.current
 
     LaunchedEffect(taskId) {
         viewModel.loadTaskDetails(taskId)
     }
-
 
     LaunchedEffect(uiState.currentTask) {
         if (taskId != "-1" && uiState.currentTask != null) {
@@ -47,7 +53,6 @@ fun EditTaskScreen(navController: androidx.navigation.NavController, viewModel: 
         )
         Spacer(modifier = Modifier.height(16.dp))
 
-
         if (uiState.error != null) {
             Text(
                 text = "Greška: ${uiState.error}",
@@ -59,9 +64,17 @@ fun EditTaskScreen(navController: androidx.navigation.NavController, viewModel: 
 
         Button(
             onClick = {
-                viewModel.saveTask(taskId, title, description) {
-                    navController.popBackStack()
-                }
+                viewModel.saveTask(
+                    id = taskId,
+                    title = title,
+                    description = description,
+                    onSuccess = {
+                        navController.popBackStack()
+                    },
+                    onError = { porukaGreske ->
+                        Toast.makeText(context, porukaGreske, Toast.LENGTH_SHORT).show()
+                    }
+                )
             },
             modifier = Modifier.fillMaxWidth()
         ) {

@@ -5,22 +5,37 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.*
 import com.example.notesapp.screens.*
 import com.example.notesapp.viewmodel.TaskViewModel
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.navigation.NavHostController
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import com.example.notesapp.screens.EditTaskScreen
+import com.example.notesapp.screens.LoginScreen
+import com.example.notesapp.screens.TaskListScreen
 
 @Composable
-fun NavGraph() {
-    val navController = rememberNavController()
-    val taskViewModel: TaskViewModel = viewModel()
+fun NavGraph(navController: NavHostController = androidx.navigation.compose.rememberNavController(), taskViewModel: TaskViewModel) {
+    val uiState by taskViewModel.uiState.collectAsState()
 
-    NavHost(navController = navController, startDestination = "login") {
+
+    val startDestination = if (uiState.isLoggedIn) "tasks" else "login"
+
+    NavHost(
+        navController = navController,
+        startDestination = startDestination
+    ) {
         composable("login") {
-            LoginScreen(navController, taskViewModel)
+            LoginScreen(navController = navController, viewModel = taskViewModel)
         }
-        composable("list") {
-            TaskListScreen(navController, taskViewModel)
+
+        composable("tasks") {
+            TaskListScreen(navController = navController, viewModel = taskViewModel)
         }
+
         composable("edit/{taskId}") { backStackEntry ->
             val taskId = backStackEntry.arguments?.getString("taskId") ?: "-1"
-            EditTaskScreen(navController, taskViewModel, taskId)
+            EditTaskScreen(navController = navController, viewModel = taskViewModel as com.example.notesapp.viewmodel.TaskViewModel, taskId = taskId)
         }
     }
 }
