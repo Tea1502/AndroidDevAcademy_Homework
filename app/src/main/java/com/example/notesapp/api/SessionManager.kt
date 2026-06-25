@@ -29,7 +29,6 @@ class SessionManager(private val context: Context) {
         }
     }
 
-    // Brisanje tokena (odjava)
     suspend fun clearSession() {
         context.dataStore.edit { preferences ->
             preferences.remove(TOKEN_KEY)

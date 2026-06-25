@@ -5,14 +5,18 @@ import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.example.notesapp.viewmodel.TaskViewModel
 import com.example.notesapp.model.Task
+import androidx.compose.material3.TextField
 
-@OptIn(ExperimentalFoundationApi::class)
+
+@OptIn(ExperimentalFoundationApi::class, ExperimentalMaterial3Api::class) // <- DODANO OVDJE!
 @Composable
 fun TaskListScreen(navController: androidx.navigation.NavController, viewModel: TaskViewModel) {
     val uiState by viewModel.uiState.collectAsState()
@@ -39,11 +43,33 @@ fun TaskListScreen(navController: androidx.navigation.NavController, viewModel: 
 
     Column(modifier = Modifier.fillMaxSize().padding(16.dp)) {
         Text("Moji Zadaci (API)", style = MaterialTheme.typography.headlineMedium)
+
         Spacer(modifier = Modifier.height(8.dp))
+
         Button(onClick = { navController.navigate("edit/-1") }, modifier = Modifier.fillMaxWidth()) {
             Text("Dodaj novi zadatak (+)")
         }
+
         Spacer(modifier = Modifier.height(16.dp))
+
+        TextField(
+            value = uiState.searchQuery,
+            onValueChange = { noviTekst ->
+                viewModel.updateSearchQuery(noviTekst)
+            },
+            modifier = Modifier.fillMaxWidth(),
+            placeholder = { Text("Pretraži zadatke...") },
+            leadingIcon = {
+                Icon(
+                    imageVector = Icons.Default.Search,
+                    contentDescription = "Ikona pretrage"
+                )
+            },
+            singleLine = true
+        )
+
+        Spacer(modifier = Modifier.height(16.dp))
+
         LazyColumn(verticalArrangement = Arrangement.spacedBy(8.dp)) {
             items(uiState.tasks) { task ->
                 Card(

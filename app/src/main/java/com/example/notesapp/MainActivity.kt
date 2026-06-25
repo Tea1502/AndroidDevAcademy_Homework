@@ -15,8 +15,6 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         setContent {
             NotesappTheme {
-                // Koristimo standardni Compose viewModel() - Hilt će ga automatski prepoznati
-                // jer iznad klase stoji @AndroidEntryPoint
                 val taskViewModel: TaskViewModel = viewModel()
 
                 NavGraph(taskViewModel = taskViewModel)

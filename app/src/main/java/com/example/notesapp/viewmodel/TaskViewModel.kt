@@ -11,23 +11,26 @@ import com.example.notesapp.util.AppLogger
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.SharingStarted
 
 data class TaskUiState(
     val tasks: List<Task> = emptyList(),
     val currentTask: Task? = null,
     val isLoggedIn: Boolean = false,
     val isLoading: Boolean = false,
-    val error: String? = null
+    val error: String? = null,
+    val searchQuery: String = ""
 )
 
 @HiltViewModel
 class TaskViewModel @Inject constructor(
     application: Application,
-    private val logger: AppLogger // Ubrizgavamo Logger preko Hilt DI-ja
+    private val logger: AppLogger
 ) : AndroidViewModel(application) {
 
     private val apiService = TaskApiService.create()
@@ -35,7 +38,23 @@ class TaskViewModel @Inject constructor(
     private val taskDao = AppDatabase.getDatabase(application).taskDao()
 
     private val _uiState = MutableStateFlow(TaskUiState())
-    val uiState: StateFlow<TaskUiState> = _uiState.asStateFlow()
+    val uiState: StateFlow<TaskUiState> = _uiState
+        .map { state ->
+            if (state.searchQuery.isEmpty()) {
+                state
+            } else {
+                val filtriraniZadaci = state.tasks.filter { task ->
+                    task.title.contains(state.searchQuery, ignoreCase = true) ||
+                            (task.body?.contains(state.searchQuery, ignoreCase = true) == true)
+                }
+                state.copy(tasks = filtriraniZadaci)
+            }
+        }
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000),
+            initialValue = TaskUiState()
+        )
 
     init {
         logger.logI("TaskViewModel inicijaliziran pomoću Hilt DI-ja.")
@@ -138,7 +157,6 @@ class TaskViewModel @Inject constructor(
             val lokalniTask = Task(id = privremeniId, title = title, body = description)
 
             try {
-                // Prvenstveno pohranjujemo u lokalnu bazu
                 taskDao.insertTasks(listOf(lokalniTask))
                 logger.logD("Task prvenstveno pohranjen u lokalnu Room bazu (ID: $privremeniId)")
 
@@ -191,5 +209,9 @@ class TaskViewModel @Inject constructor(
             logger.logI("Odjava uspješno izvršena.")
             onSuccess()
         }
+    }
+
+    fun updateSearchQuery(query: String) {
+        _uiState.value = _uiState.value.copy(searchQuery = query)
     }
 }
